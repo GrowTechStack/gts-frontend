@@ -1,0 +1,95 @@
+import { Link } from 'react-router-dom'
+import type { Content } from '../types'
+
+const DEFAULT_THUMBNAIL = '/img/default-thumbnail.svg'
+const DEFAULT_LOGO = '/img/default-logo.svg'
+
+interface Props {
+  content: Content
+  siteLogos: Record<string, string>
+  isRead: boolean
+  onRead: (id: number) => void
+}
+
+export default function ContentCard({ content, siteLogos, isRead, onRead }: Props) {
+  const tags = content.tags ? content.tags.split(',').map((t) => t.trim()).filter(Boolean) : []
+  const logo = siteLogos[content.siteName] ?? DEFAULT_LOGO
+  const dateStr = new Date(content.publishedAt).toLocaleDateString('ko-KR', {
+    year: 'numeric', month: 'long', day: 'numeric',
+  })
+
+  return (
+    <div
+      className="rounded-xl border border-[#e9ecef] bg-white mb-5 transition-all duration-200 hover:border-[#0d6efd] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]"
+      style={isRead ? { backgroundColor: '#fcfcfc', opacity: 0.8 } : {}}
+    >
+      <div className="p-4 md:p-5 flex items-center gap-0">
+        <div className="flex-1 min-w-0">
+          {/* 제목 */}
+          <h5 className="mb-2">
+            <Link
+              to={`/contents/${content.id}`}
+              onClick={() => onRead(content.id)}
+              className="text-[#111] no-underline font-bold text-[1.05rem] leading-[1.4] tracking-[-0.02em] hover:text-[#0d6efd] transition-colors line-clamp-2"
+              style={isRead ? { color: '#adb5bd', fontWeight: 500 } : {}}
+            >
+              {content.title}
+            </Link>
+          </h5>
+
+          {/* 요약 */}
+          {content.summary && (
+            <p className="text-[#555] text-[0.875rem] leading-[1.55] mb-3 line-clamp-2">
+              {content.summary}
+            </p>
+          )}
+
+          {/* 태그 */}
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-0">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="text-[0.85rem] px-3 py-1 bg-[#f8f9fa] text-[#666] border border-[#eee] rounded-md font-medium"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* 메타바 */}
+          <div className="flex items-center text-[0.85rem] text-[#888] mt-5">
+            <img
+              src={logo}
+              alt="logo"
+              onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_LOGO }}
+              className="w-5 h-5 rounded-full object-cover border border-[#f1f3f5] mr-1.5"
+            />
+            <span className="font-bold text-[#333] mr-2">{content.siteName}</span>
+            <span className="mr-2 text-[#aaa]">·</span>
+            <span>{dateStr}</span>
+            <span className="mx-2">·</span>
+            <span className="inline-flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              {content.viewCount}
+            </span>
+          </div>
+        </div>
+
+        {/* 썸네일 */}
+        <div className="hidden md:block w-[140px] h-[95px] ml-5 shrink-0">
+          <img
+            src={content.thumbnailUrl ?? DEFAULT_THUMBNAIL}
+            alt="thumbnail"
+            onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_THUMBNAIL }}
+            className="w-full h-full object-cover rounded-lg border border-[#e9ecef] bg-[#f1f3f5]"
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
