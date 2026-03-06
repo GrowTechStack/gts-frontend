@@ -54,3 +54,8 @@ export const startCollection = async () => {
     apiClient.post('/v1/summarize/start'),
   ])
 }
+
+export const resummary = async () => {
+  const { data } = await apiClient.post<ApiResponse<number>>('/v1/collector/resummary')
+  return data.data
+}
