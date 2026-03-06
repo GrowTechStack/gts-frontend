@@ -35,3 +35,22 @@ export const getFailureLogs = async () => {
   const { data } = await apiClient.get<ApiResponse<CollectorLog[]>>('/v1/collector/logs/failures')
   return data.data
 }
+
+export const getCollectionStatus = async (): Promise<boolean> => {
+  const { data } = await apiClient.get<ApiResponse<{ running: boolean }>>('/v1/collector/status')
+  return data.data.running
+}
+
+export const stopCollection = async () => {
+  await Promise.all([
+    apiClient.post('/v1/collector/stop'),
+    apiClient.post('/v1/summarize/stop'),
+  ])
+}
+
+export const startCollection = async () => {
+  await Promise.all([
+    apiClient.post('/v1/collector/start'),
+    apiClient.post('/v1/summarize/start'),
+  ])
+}

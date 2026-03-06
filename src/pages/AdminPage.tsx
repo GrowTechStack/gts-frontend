@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   getRssSources, addRssSource, updateRssSource, deleteRssSource,
   triggerCollect, getLogs, getFailureLogs,
+  getCollectionStatus, stopCollection, startCollection,
 } from '../api/rss'
 import type { RssSource } from '../types'
 
@@ -31,6 +32,20 @@ export default function AdminPage() {
     setToast(msg)
     setTimeout(() => setToast(null), 3000)
   }
+
+  const { data: collectionRunning = true } = useQuery({
+    queryKey: ['collection-status'],
+    queryFn: getCollectionStatus,
+  })
+
+  const toggleCollectionMutation = useMutation({
+    mutationFn: () => collectionRunning ? stopCollection() : startCollection(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['collection-status'] })
+      showToast(collectionRunning ? '수집이 중지되었습니다.' : '수집이 시작되었습니다.')
+    },
+    onError: () => showToast('상태 변경 중 오류가 발생했습니다.'),
+  })
 
   const { data: sources = [] } = useQuery({
     queryKey: ['rss-sources'],
@@ -110,17 +125,28 @@ export default function AdminPage() {
         {/* 헤더 */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-[#111]">관리자</h2>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <button
+              onClick={() => toggleCollectionMutation.mutate()}
+              disabled={toggleCollectionMutation.isPending}
+              className={`px-4 py-2 text-sm font-bold rounded-lg disabled:opacity-50 transition-colors ${
+                collectionRunning
+                  ? 'bg-[#dc3545] text-white hover:bg-[#bb2d3b]'
+                  : 'bg-[#198754] text-white hover:bg-[#157347]'
+              }`}
+            >
+              {collectionRunning ? '수집 비활성화' : '수집 활성화'}
+            </button>
             <button
               onClick={() => handleCollect(false)}
-              disabled={collectMutation.isPending}
+              disabled={collectMutation.isPending || !collectionRunning}
               className="px-4 py-2 bg-[#0d6efd] text-white text-sm font-bold rounded-lg hover:bg-[#0b5ed7] disabled:opacity-50 transition-colors"
             >
               최근 2일 수집
             </button>
             <button
               onClick={() => handleCollect(true)}
-              disabled={collectMutation.isPending}
+              disabled={collectMutation.isPending || !collectionRunning}
               className="px-4 py-2 border border-[#0d6efd] text-[#0d6efd] text-sm font-bold rounded-lg hover:bg-[#f0f4ff] disabled:opacity-50 transition-colors"
             >
               전체 수집
