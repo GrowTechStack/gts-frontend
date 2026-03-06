@@ -114,7 +114,7 @@ export default function ContentDetailPage() {
 
               {/* 요약 본문 */}
               <div className="text-[#6c757d] text-[1.05rem] leading-[1.8] mb-10 whitespace-pre-line">
-                {content.summary ?? '요약 내용이 없습니다.'}
+                {content.summary ?? '해당 컨텐츠는 AI가 요약할 내용이 없습니다.'}
               </div>
 
               {/* 원문 보기 버튼 */}
