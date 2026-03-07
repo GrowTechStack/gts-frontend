@@ -20,7 +20,7 @@ export default function ContentCard({ content, siteLogos, isRead, onRead }: Prop
 
   return (
     <div
-      className={`rounded-xl border border-[#e9ecef] mb-5 transition-all duration-200 hover:border-[#0d6efd] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] ${isRead ? 'bg-[#fcfcfc] opacity-80' : 'bg-white'}`}
+      className={`rounded-xl border border-line-lt mb-5 transition-all duration-200 hover:border-brand hover:shadow-[0_8px_24px_var(--shadow-card)] ${isRead ? 'bg-read-bg opacity-80' : 'bg-card'}`}
     >
       <div className="p-4 md:p-5 flex items-center gap-0">
         <div className="flex-1 min-w-0">
@@ -29,7 +29,7 @@ export default function ContentCard({ content, siteLogos, isRead, onRead }: Prop
             <Link
               to={`/contents/${content.id}`}
               onClick={() => onRead(content.id)}
-              className={`no-underline text-[1.05rem] leading-[1.4] tracking-[-0.02em] hover:text-[#0d6efd] transition-colors line-clamp-2 ${isRead ? 'text-[#adb5bd] font-medium' : 'text-[#111] font-bold'}`}
+              className={`no-underline text-[1.05rem] leading-[1.4] tracking-[-0.02em] hover:text-brand transition-colors line-clamp-2 ${isRead ? 'text-read-text font-medium' : 'text-heading font-bold'}`}
             >
               {content.title}
             </Link>
@@ -37,7 +37,7 @@ export default function ContentCard({ content, siteLogos, isRead, onRead }: Prop
 
           {/* 요약 */}
           {content.summary && (
-            <p className="text-[#555] text-[0.875rem] leading-[1.55] mb-3 line-clamp-2">
+            <p className="text-secondary text-[0.875rem] leading-[1.55] mb-3 line-clamp-2">
               {content.summary}
             </p>
           )}
@@ -48,7 +48,7 @@ export default function ContentCard({ content, siteLogos, isRead, onRead }: Prop
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-[0.85rem] px-3 py-1 bg-[#f8f9fa] text-[#666] border border-[#eee] rounded-md font-medium"
+                  className="text-[0.85rem] px-3 py-1 bg-page text-secondary border border-line-xs rounded-md font-medium"
                 >
                   {tag}
                 </span>
@@ -57,17 +57,17 @@ export default function ContentCard({ content, siteLogos, isRead, onRead }: Prop
           )}
 
           {/* 메타바 */}
-          <div className="flex items-center text-[0.85rem] text-[#888] mt-5">
+          <div className="flex items-center text-[0.85rem] text-muted mt-5">
             <img
               src={logo}
               alt="logo"
               onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_LOGO }}
-              className="w-5 h-5 rounded-full object-cover border border-[#f1f3f5] mr-1.5"
+              className="w-5 h-5 rounded-full object-cover border border-surface mr-1.5"
             />
-            <span className="font-bold text-[#333] mr-2">{content.siteName}</span>
-            <span className="mr-2 text-[#aaa]">·</span>
+            <span className="font-bold text-body mr-2">{content.siteName}</span>
+            <span className="mr-2 text-faint">·</span>
             <span>{dateStr}</span>
-            <span className="mx-2 text-[#aaa]">·</span>
+            <span className="mx-2 text-faint">·</span>
             <span className="inline-flex items-center gap-1">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
@@ -84,7 +84,7 @@ export default function ContentCard({ content, siteLogos, isRead, onRead }: Prop
             src={content.thumbnailUrl ?? DEFAULT_THUMBNAIL}
             alt="thumbnail"
             onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_THUMBNAIL }}
-            className="w-full h-full object-cover rounded-lg border border-[#e9ecef] bg-[#f1f3f5]"
+            className="w-full h-full object-cover rounded-lg border border-line-lt bg-surface"
           />
         </div>
       </div>

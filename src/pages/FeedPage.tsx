@@ -121,7 +121,7 @@ export default function FeedPage() {
   const setCurrentPage = isSearchMode ? setSearchPage : setPage
 
   return (
-    <div className="bg-[#f8f9fa] min-h-screen">
+    <div className="bg-page min-h-screen">
       <div className="max-w-[1140px] mx-auto px-4 py-6">
         <div className="flex justify-center items-start gap-6">
           {/* 메인 콘텐츠 */}
@@ -150,8 +150,8 @@ export default function FeedPage() {
                     onClick={handleResetSites}
                     className={`shrink-0 flex items-center px-3 py-1.5 rounded-full border text-[0.8rem] font-semibold transition-colors ${
                       selectedSites.size === 0
-                        ? 'bg-[#0d6efd] border-[#0d6efd] text-white'
-                        : 'bg-white border-[#dee2e6] text-[#555]'
+                        ? 'bg-brand border-brand text-white'
+                        : 'bg-card border-line text-secondary'
                     }`}
                   >
                     전체
@@ -162,8 +162,8 @@ export default function FeedPage() {
                       onClick={() => handleToggleSite(source.siteName)}
                       className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[0.8rem] font-semibold transition-colors ${
                         selectedSites.has(source.siteName)
-                          ? 'bg-[#0d6efd] border-[#0d6efd] text-white'
-                          : 'bg-white border-[#dee2e6] text-[#555]'
+                          ? 'bg-brand border-brand text-white'
+                          : 'bg-card border-line text-secondary'
                       }`}
                     >
                       <img
@@ -181,8 +181,8 @@ export default function FeedPage() {
 
             {/* 검색 결과 헤더 */}
             {isSearchMode && (
-              <div className="mb-3 text-[0.85rem] text-[#888]">
-                '<strong className="text-[#111]">{searchQuery}</strong>' 검색 결과 ({data?.totalElements ?? 0}건)
+              <div className="mb-3 text-[0.85rem] text-muted">
+                '<strong className="text-heading">{searchQuery}</strong>' 검색 결과 ({data?.totalElements ?? 0}건)
               </div>
             )}
 
@@ -198,10 +198,10 @@ export default function FeedPage() {
             {/* 콘텐츠 목록 */}
             {isLoading ? (
               <div className="flex justify-center py-20">
-                <div className="w-8 h-8 border-4 border-[#0d6efd] border-t-transparent rounded-full animate-spin" />
+                <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin" />
               </div>
             ) : data?.content.length === 0 ? (
-              <div className="text-center text-[#888] py-20 text-[0.95rem]">
+              <div className="text-center text-muted py-20 text-[0.95rem]">
                 {isSearchMode ? '검색 결과가 없습니다.' : '게시글이 없습니다.'}
               </div>
             ) : (
