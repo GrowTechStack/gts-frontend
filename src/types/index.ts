@@ -15,12 +15,12 @@ export interface Content {
 
 export interface PageResponse<T> {
   content: T[]
-  totalPages: number
-  totalElements: number
-  number: number
-  size: number
-  first: boolean
-  last: boolean
+  page: {
+    totalPages: number
+    totalElements: number
+    number: number
+    size: number
+  }
 }
 
 export interface ApiResponse<T> {

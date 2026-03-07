@@ -182,7 +182,7 @@ export default function FeedPage() {
             {/* 검색 결과 헤더 */}
             {isSearchMode && (
               <div className="mb-3 text-[0.85rem] text-muted">
-                '<strong className="text-heading">{searchQuery}</strong>' 검색 결과 ({data?.totalElements ?? 0}건)
+                '<strong className="text-heading">{searchQuery}</strong>' 검색 결과 ({data?.page?.totalElements ?? 0}건)
               </div>
             )}
 
@@ -219,10 +219,10 @@ export default function FeedPage() {
             {/* 페이지네이션 */}
             <Pagination
               currentPage={currentPage}
-              totalPages={data?.totalPages ?? 0}
+              totalPages={data?.page?.totalPages ?? 0}
               onPageChange={setCurrentPage}
-              first={data?.first ?? true}
-              last={data?.last ?? true}
+              first={(data?.page?.number ?? 0) === 0}
+              last={(data?.page?.number ?? 0) >= (data?.page?.totalPages ?? 1) - 1}
             />
           </div>
 
