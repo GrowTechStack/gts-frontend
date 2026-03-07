@@ -494,11 +494,53 @@ export default function AdminPage() {
         )}
 
         {/* 탭: 접속 로그 */}
-        {tab === 'access-logs' && (
-          <div className="bg-white rounded-2xl shadow-sm border border-[#e9ecef] overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-[#f1f3f5]">
-              <p className="text-xs text-[#888]">최근 100건 · 10초마다 갱신</p>
-            </div>
+        {tab === 'access-logs' && (() => {
+          const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0)
+          const todayLogs = accessLogs.filter((log) => new Date(log.createdAt) >= todayStart && log.rawIp)
+          const ipCountMap = todayLogs.reduce<Record<string, number>>((acc, log) => {
+            const ip = log.rawIp!
+            acc[ip] = (acc[ip] ?? 0) + 1
+            return acc
+          }, {})
+          const todayUniqueIps = Object.entries(ipCountMap).sort((a, b) => b[1] - a[1])
+
+          return (
+            <>
+              {/* 오늘 접속 IP 요약 */}
+              <div className="bg-white rounded-2xl shadow-sm border border-[#e9ecef] overflow-hidden mb-4">
+                <div className="px-5 py-3 border-b border-[#f1f3f5] flex items-center gap-2">
+                  <p className="text-xs font-semibold text-[#888] uppercase tracking-wide">오늘 접속 IP</p>
+                  <span className="text-xs bg-[#f0f4ff] text-[#0d6efd] font-bold px-2 py-0.5 rounded-full">{todayUniqueIps.length}개</span>
+                </div>
+                {todayUniqueIps.length === 0 ? (
+                  <p className="text-center text-[#888] py-6 text-sm">오늘 접속 기록이 없습니다.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-[#f1f3f5] bg-[#f8f9fa]">
+                          <th className="py-2.5 pl-5 text-left text-xs font-semibold text-[#888] uppercase tracking-wide">IP</th>
+                          <th className="py-2.5 text-center text-xs font-semibold text-[#888] uppercase tracking-wide pr-5">요청 수</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {todayUniqueIps.map(([ip, count]) => (
+                          <tr key={ip} className="border-b border-[#f8f9fa] last:border-0">
+                            <td className="py-2 pl-5 font-mono text-xs text-[#333]">{ip}</td>
+                            <td className="py-2 text-center text-xs font-bold text-[#555] pr-5">{count}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* 전체 로그 */}
+              <div className="bg-white rounded-2xl shadow-sm border border-[#e9ecef] overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-3 border-b border-[#f1f3f5]">
+                  <p className="text-xs text-[#888]">최근 100건 · 10초마다 갱신</p>
+                </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -532,7 +574,9 @@ export default function AdminPage() {
               </table>
             </div>
           </div>
-        )}
+            </>
+          )
+        })()}
       </div>
 
       {/* 수정 모달 */}
