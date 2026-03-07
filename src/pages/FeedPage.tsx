@@ -2,10 +2,9 @@ import { useState, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getContents, searchContents } from '../api/contents'
 import { getRssSources } from '../api/rss'
+import { getTags } from '../api/tags'
 import ContentCard from '../components/ContentCard'
 import SourceSidebar from '../components/SourceSidebar'
-
-const TAGS = ['backend', 'frontend', 'ai', 'design', 'tech']
 
 function getReadIds(): number[] {
   try {
@@ -54,6 +53,12 @@ export default function FeedPage() {
   const { data: rssSources = [] } = useQuery({
     queryKey: ['rss-sources'],
     queryFn: getRssSources,
+  })
+
+  const { data: tags = [] } = useQuery({
+    queryKey: ['tags'],
+    queryFn: getTags,
+    staleTime: 1000 * 60 * 10,
   })
 
   const siteLogos: Record<string, string> = {}
@@ -113,7 +118,7 @@ export default function FeedPage() {
                   onChange={(e) => setSearchInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleSearch() }}
                   placeholder="제목, 내용으로 검색..."
-                  className="flex-1 border border-[#e9ecef] rounded-l-[10px] px-3 py-2 text-[0.9rem] outline-none focus:border-[#0d6efd] transition-colors"
+                  className="flex-1 bg-white border border-[#e9ecef] rounded-l-[10px] px-3 py-2 text-[0.9rem] outline-none focus:border-[#0d6efd] transition-colors"
                 />
                 <button
                   onClick={() => handleSearch()}
@@ -152,7 +157,7 @@ export default function FeedPage() {
                 >
                   전체
                 </button>
-                {TAGS.map((tag) => (
+                {tags.map((tag) => (
                   <button
                     key={tag}
                     onClick={() => { setSelectedTag(tag); setPage(0) }}
