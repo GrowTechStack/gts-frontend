@@ -48,7 +48,7 @@ export default function ContentDetailPage() {
     <div className="bg-[#f8f9fa] min-h-screen">
       <div className="max-w-[1140px] mx-auto px-4 py-6">
         <div className="flex justify-center">
-          <div className="w-full" style={{ maxWidth: 768 }}>
+          <div className="w-full max-w-[768px]">
             {/* 뒤로가기 */}
             <nav className="mb-4">
               <Link to="/" className="text-[#6c757d] text-sm hover:text-[#0d6efd] no-underline transition-colors">

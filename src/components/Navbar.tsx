@@ -9,7 +9,7 @@ export default function Navbar() {
         </Link>
         <div className="flex items-center gap-4">
           <Link to="/" className="text-[#555] text-sm hover:text-[#0d6efd] transition-colors">
-            최신 피드
+            국내 IT 기업 기술 블로그 모음
           </Link>
         </div>
       </div>

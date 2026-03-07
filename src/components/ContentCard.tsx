@@ -20,8 +20,7 @@ export default function ContentCard({ content, siteLogos, isRead, onRead }: Prop
 
   return (
     <div
-      className="rounded-xl border border-[#e9ecef] bg-white mb-5 transition-all duration-200 hover:border-[#0d6efd] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)]"
-      style={isRead ? { backgroundColor: '#fcfcfc', opacity: 0.8 } : {}}
+      className={`rounded-xl border border-[#e9ecef] mb-5 transition-all duration-200 hover:border-[#0d6efd] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] ${isRead ? 'bg-[#fcfcfc] opacity-80' : 'bg-white'}`}
     >
       <div className="p-4 md:p-5 flex items-center gap-0">
         <div className="flex-1 min-w-0">
@@ -30,8 +29,7 @@ export default function ContentCard({ content, siteLogos, isRead, onRead }: Prop
             <Link
               to={`/contents/${content.id}`}
               onClick={() => onRead(content.id)}
-              className="text-[#111] no-underline font-bold text-[1.05rem] leading-[1.4] tracking-[-0.02em] hover:text-[#0d6efd] transition-colors line-clamp-2"
-              style={isRead ? { color: '#adb5bd', fontWeight: 500 } : {}}
+              className={`no-underline text-[1.05rem] leading-[1.4] tracking-[-0.02em] hover:text-[#0d6efd] transition-colors line-clamp-2 ${isRead ? 'text-[#adb5bd] font-medium' : 'text-[#111] font-bold'}`}
             >
               {content.title}
             </Link>

@@ -101,9 +101,9 @@ export default function FeedPage() {
   return (
     <div className="bg-[#f8f9fa] min-h-screen">
       <div className="max-w-[1140px] mx-auto px-4 py-6">
-        <div className="flex justify-center gap-6" style={{ alignItems: 'flex-start' }}>
+        <div className="flex justify-center items-start gap-6">
           {/* 메인 콘텐츠 */}
-          <div style={{ width: '100%', maxWidth: 850, minWidth: 0 }}>
+          <div className="w-full max-w-[850px] min-w-0">
             {/* 검색바 */}
             <div className="mb-3 flex gap-2">
               <div className="flex flex-1">
@@ -141,7 +141,7 @@ export default function FeedPage() {
 
             {/* 태그 네비게이션 */}
             {!isSearchMode && (
-              <div className="flex gap-2.5 overflow-x-auto mb-4 mt-2 pb-1 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+              <div className="flex gap-2.5 overflow-x-auto mb-4 mt-2 pb-1 scrollbar-hide [scrollbar-width:none]">
                 <button
                   onClick={() => { setSelectedTag(null); setPage(0) }}
                   className={`px-4 py-1.5 rounded-full border text-[0.95rem] font-medium whitespace-nowrap transition-all ${
