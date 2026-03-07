@@ -71,20 +71,17 @@ export default function ContentDetailPage() {
 
               {/* 헤더 정보 */}
               <div className="mb-4">
-                <div className="flex items-center mb-2">
+                <div className="flex items-center mb-2 text-[0.85rem] text-[#888]">
                   <img
                     src={siteLogo}
                     alt="logo"
                     onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_LOGO }}
-                    className="w-5 h-5 rounded-full object-cover border border-[#e9ecef] mr-2"
+                    className="w-5 h-5 rounded-full object-cover border border-[#e9ecef] mr-1.5"
                   />
-                  <span className="text-[0.8rem] bg-[#0d6efd]/10 text-[#0d6efd] px-2 py-0.5 rounded font-medium mr-2">
-                    {content.siteName}
-                  </span>
-                  <small className="text-[#6c757d] text-sm">{dateStr}</small>
-                </div>
-                <h1 className="text-2xl font-bold mb-3 text-[#111] leading-tight">{content.title}</h1>
-                <div className="flex items-center gap-2 text-[#6c757d] text-sm flex-wrap">
+                  <span className="font-bold text-[#333] mr-2">{content.siteName}</span>
+                  <span className="mr-2 text-[#aaa]">·</span>
+                  <span>{dateStr}</span>
+                  <span className="mx-2 text-[#aaa]">·</span>
                   <span className="inline-flex items-center gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
@@ -92,6 +89,9 @@ export default function ContentDetailPage() {
                     </svg>
                     {content.viewCount}
                   </span>
+                </div>
+                <h1 className="text-2xl font-bold mb-3 text-[#111] leading-tight">{content.title}</h1>
+                <div className="flex items-center gap-2 text-[#6c757d] text-sm flex-wrap">
                   {tags.map((tag) => (
                     <span key={tag} className="text-[0.85rem] px-3 py-1 bg-[#f8f9fa] text-[#666] border border-[#eee] rounded-md font-medium">
                       {tag}
