@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import type { RssSource } from '../types'
+import type { RssSource } from '../../types'
 
 const DEFAULT_LOGO = '/img/default-logo.svg'
 
@@ -16,27 +16,22 @@ interface Props {
   onReset: () => void
 }
 
-export default function SourceSidebar({ sources, selectedSites, onToggle, onReset }: Props) {
-  const [modalOpen, setModalOpen] = useState(false)
-  const [hoverInfo, setHoverInfo] = useState<HoverInfo | null>(null)
-  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+interface SourceItemProps {
+  source: RssSource
+  inModal?: boolean
+  selectedSites: Set<string>
+  onToggle: (name: string) => void
+  onMouseEnter: (e: React.MouseEvent<HTMLDivElement>, source: RssSource) => void
+  onMouseLeave: () => void
+}
 
-  const showHover = (e: React.MouseEvent<HTMLDivElement>, source: RssSource) => {
-    if (hideTimer.current) clearTimeout(hideTimer.current)
-    const rect = (e.currentTarget.querySelector('.source-item') as HTMLElement).getBoundingClientRect()
-    setHoverInfo({ source, x: rect.left, y: rect.bottom })
-  }
-
-  const hideHover = () => {
-    hideTimer.current = setTimeout(() => setHoverInfo(null), 150)
-  }
-
-  const SourceItem = ({ source, inModal = false }: { source: RssSource; inModal?: boolean }) => (
+function SourceItem({ source, inModal = false, selectedSites, onToggle, onMouseEnter, onMouseLeave }: SourceItemProps) {
+  return (
     <div
       className="cursor-pointer rounded-lg"
       onClick={() => onToggle(source.siteName)}
-      onMouseEnter={(e) => showHover(e, source)}
-      onMouseLeave={hideHover}
+      onMouseEnter={(e) => onMouseEnter(e, source)}
+      onMouseLeave={onMouseLeave}
     >
       <div
         className={`source-item flex items-center py-2 border-b border-[#f1f3f5] last:border-0 text-[0.85rem] rounded-lg px-1 transition-colors ${
@@ -59,7 +54,7 @@ export default function SourceSidebar({ sources, selectedSites, onToggle, onRese
               {source.siteName}
             </div>
             <div className="text-[0.75rem] text-[#aaa] mt-0.5">
-              포스트 {source.postCount}개 · 조회 {source.totalViewCount.toLocaleString()}회
+              포스트 {source.postCount ?? 0}개 · 조회 {(source.totalViewCount ?? 0).toLocaleString()}회
             </div>
           </div>
         ) : (
@@ -73,6 +68,24 @@ export default function SourceSidebar({ sources, selectedSites, onToggle, onRese
       </div>
     </div>
   )
+}
+
+export default function SourceSidebar({ sources, selectedSites, onToggle, onReset }: Props) {
+  const [modalOpen, setModalOpen] = useState(false)
+  const [hoverInfo, setHoverInfo] = useState<HoverInfo | null>(null)
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const showHover = (e: React.MouseEvent<HTMLDivElement>, source: RssSource) => {
+    if (hideTimer.current) clearTimeout(hideTimer.current)
+    const el = e.currentTarget.querySelector('.source-item') as HTMLElement | null
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    setHoverInfo({ source, x: rect.left, y: rect.bottom })
+  }
+
+  const hideHover = () => {
+    hideTimer.current = setTimeout(() => setHoverInfo(null), 150)
+  }
 
   return (
     <>
@@ -83,7 +96,14 @@ export default function SourceSidebar({ sources, selectedSites, onToggle, onRese
           </div>
 
           {sources.slice(0, 5).map((source) => (
-            <SourceItem key={source.id} source={source} />
+            <SourceItem
+              key={source.id}
+              source={source}
+              selectedSites={selectedSites}
+              onToggle={onToggle}
+              onMouseEnter={showHover}
+              onMouseLeave={hideHover}
+            />
           ))}
 
           {sources.length > 5 && (
@@ -118,7 +138,15 @@ export default function SourceSidebar({ sources, selectedSites, onToggle, onRese
               <button onClick={() => setModalOpen(false)} className="text-[#888] text-xl leading-none">✕</button>
             </div>
             {sources.map((source) => (
-              <SourceItem key={source.id} source={source} inModal />
+              <SourceItem
+                key={source.id}
+                source={source}
+                inModal
+                selectedSites={selectedSites}
+                onToggle={onToggle}
+                onMouseEnter={showHover}
+                onMouseLeave={hideHover}
+              />
             ))}
           </div>
         </div>
@@ -148,13 +176,13 @@ export default function SourceSidebar({ sources, selectedSites, onToggle, onRese
           </div>
           <div className="flex justify-between text-[0.8rem] text-[#444] mb-1">
             <span className="text-[#aaa]">총 조회수</span>
-            <span>{hoverInfo.source.totalViewCount.toLocaleString()}회</span>
+            <span>{(hoverInfo.source.totalViewCount ?? 0).toLocaleString()}회</span>
           </div>
           {hoverInfo.source.latestPublishedAt && (
             <div className="flex justify-between text-[0.8rem] text-[#444] mb-1">
               <span className="text-[#aaa]">마지막 포스트</span>
               <span>
-                {new Date(hoverInfo.source.latestPublishedAt).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })}
+                {new Date(hoverInfo.source.latestPublishedAt).toLocaleDateString('ko-KR', { year: 'numeric', month: 'numeric', day: 'numeric' })}
               </span>
             </div>
           )}

@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import Navbar from './components/Navbar'
+import Navbar from './components/common/Navbar'
 import FeedPage from './pages/FeedPage'
 import ContentDetailPage from './pages/ContentDetailPage'
 import AdminPage from './pages/AdminPage'

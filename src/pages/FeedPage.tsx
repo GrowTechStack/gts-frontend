@@ -3,8 +3,11 @@ import { useQuery } from '@tanstack/react-query'
 import { getContents, searchContents } from '../api/contents'
 import { getRssSources } from '../api/rss'
 import { getTags } from '../api/tags'
-import ContentCard from '../components/ContentCard'
-import SourceSidebar from '../components/SourceSidebar'
+import ContentCard from '../components/content/ContentCard'
+import SourceSidebar from '../components/rss/SourceSidebar'
+import SearchBar from '../components/common/SearchBar'
+import TagNavigation from '../components/content/TagNavigation'
+import Pagination from '../components/common/Pagination'
 
 function getReadIds(): number[] {
   try {
@@ -110,32 +113,13 @@ export default function FeedPage() {
           {/* 메인 콘텐츠 */}
           <div className="w-full max-w-[850px] min-w-0">
             {/* 검색바 */}
-            <div className="mb-3 flex gap-2">
-              <div className="flex flex-1">
-                <input
-                  type="text"
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleSearch() }}
-                  placeholder="제목, 내용으로 검색..."
-                  className="flex-1 bg-white border border-[#e9ecef] rounded-l-[10px] px-3 py-2 text-[0.9rem] outline-none focus:border-[#0d6efd] transition-colors"
-                />
-                <button
-                  onClick={() => handleSearch()}
-                  className="bg-[#0d6efd] text-white px-4 py-2 rounded-r-[10px] text-[0.9rem] hover:bg-[#0b5ed7] transition-colors"
-                >
-                  검색
-                </button>
-              </div>
-              {isSearchMode && (
-                <button
-                  onClick={handleReset}
-                  className="border border-[#ccc] text-[#555] px-3 py-2 rounded-[10px] text-[0.9rem] hover:bg-[#f1f1f1] transition-colors"
-                >
-                  초기화
-                </button>
-              )}
-            </div>
+            <SearchBar
+              value={searchInput}
+              onChange={setSearchInput}
+              onSearch={() => handleSearch()}
+              onReset={handleReset}
+              isSearchMode={isSearchMode}
+            />
 
             {/* 검색 결과 헤더 */}
             {isSearchMode && (
@@ -146,31 +130,11 @@ export default function FeedPage() {
 
             {/* 태그 네비게이션 */}
             {!isSearchMode && (
-              <div className="flex gap-2.5 overflow-x-auto mb-4 mt-2 pb-1 scrollbar-hide [scrollbar-width:none]">
-                <button
-                  onClick={() => { setSelectedTag(null); setPage(0) }}
-                  className={`px-4 py-1.5 rounded-full border text-[0.95rem] font-medium whitespace-nowrap transition-all ${
-                    selectedTag === null
-                      ? 'bg-[#0d6efd] border-[#0d6efd] text-white'
-                      : 'bg-white border-[#dee2e6] text-[#6c757d] hover:border-[#0d6efd] hover:text-[#0d6efd]'
-                  }`}
-                >
-                  전체
-                </button>
-                {tags.map((tag) => (
-                  <button
-                    key={tag}
-                    onClick={() => { setSelectedTag(tag); setPage(0) }}
-                    className={`px-4 py-1.5 rounded-full border text-[0.95rem] font-medium whitespace-nowrap transition-all ${
-                      selectedTag === tag
-                        ? 'bg-[#0d6efd] border-[#0d6efd] text-white'
-                        : 'bg-white border-[#dee2e6] text-[#6c757d] hover:border-[#0d6efd] hover:text-[#0d6efd]'
-                    }`}
-                  >
-                    {tag.charAt(0).toUpperCase() + tag.slice(1)}
-                  </button>
-                ))}
-              </div>
+              <TagNavigation
+                tags={tags}
+                selectedTag={selectedTag}
+                onSelectTag={(tag) => { setSelectedTag(tag); setPage(0) }}
+              />
             )}
 
             {/* 콘텐츠 목록 */}
@@ -195,48 +159,13 @@ export default function FeedPage() {
             )}
 
             {/* 페이지네이션 */}
-            {data && data.totalPages > 1 && (
-              <nav className="mt-5 mb-5">
-                <ul className="flex justify-center items-center gap-1">
-                  <li>
-                    <button
-                      onClick={() => setCurrentPage((p) => p - 1)}
-                      disabled={data.first}
-                      className="px-3 py-1.5 text-[#6c757d] text-sm disabled:opacity-40 hover:text-[#0d6efd] transition-colors"
-                    >
-                      이전
-                    </button>
-                  </li>
-                  {(() => {
-                    const start = Math.max(0, Math.min(currentPage - 2, data.totalPages - 5))
-                    const end = Math.min(data.totalPages - 1, start + 4)
-                    return Array.from({ length: end - start + 1 }, (_, i) => start + i).map((i) => (
-                      <li key={i}>
-                        <button
-                          onClick={() => setCurrentPage(i)}
-                          className={`w-9 h-9 rounded-full text-sm transition-colors ${
-                            i === currentPage
-                              ? 'bg-[#0d6efd] text-white'
-                              : 'text-[#6c757d] hover:text-[#0d6efd]'
-                          }`}
-                        >
-                          {i + 1}
-                        </button>
-                      </li>
-                    ))
-                  })()}
-                  <li>
-                    <button
-                      onClick={() => setCurrentPage((p) => p + 1)}
-                      disabled={data.last}
-                      className="px-3 py-1.5 text-[#6c757d] text-sm disabled:opacity-40 hover:text-[#0d6efd] transition-colors"
-                    >
-                      다음
-                    </button>
-                  </li>
-                </ul>
-              </nav>
-            )}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={data?.totalPages ?? 0}
+              onPageChange={setCurrentPage}
+              first={data?.first ?? true}
+              last={data?.last ?? true}
+            />
           </div>
 
           {/* 우측 사이드바 */}

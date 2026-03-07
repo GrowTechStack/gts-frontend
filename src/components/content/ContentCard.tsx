@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import type { Content } from '../types'
+import type { Content } from '../../types'
 
 const DEFAULT_THUMBNAIL = '/img/default-thumbnail.svg'
 const DEFAULT_LOGO = '/img/default-logo.svg'
@@ -67,7 +67,7 @@ export default function ContentCard({ content, siteLogos, isRead, onRead }: Prop
             <span className="font-bold text-[#333] mr-2">{content.siteName}</span>
             <span className="mr-2 text-[#aaa]">·</span>
             <span>{dateStr}</span>
-            <span className="mx-2">·</span>
+            <span className="mx-2 text-[#aaa]">·</span>
             <span className="inline-flex items-center gap-1">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
