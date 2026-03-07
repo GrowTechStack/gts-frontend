@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   getRssSources, addRssSource, updateRssSource, deleteRssSource,
-  triggerCollect, getLogs, getFailureLogs,
+  triggerCollect, triggerCollectOne, getLogs, getFailureLogs,
   getCollectionStatus, stopCollection, startCollection, resummary,
+  getAccessStats,
 } from '../api/rss'
 import type { RssSource } from '../types'
 
@@ -33,6 +34,12 @@ export default function AdminPage() {
     setTimeout(() => setToast(null), 3000)
   }
 
+  const { data: accessStats } = useQuery({
+    queryKey: ['access-stats'],
+    queryFn: getAccessStats,
+    refetchInterval: 30_000,
+  })
+
   const { data: collectionRunning = true } = useQuery({
     queryKey: ['collection-status'],
     queryFn: getCollectionStatus,
@@ -60,6 +67,15 @@ export default function AdminPage() {
 
   const collectMutation = useMutation({
     mutationFn: (full: boolean) => triggerCollect(full),
+    onSuccess: (data) => {
+      showToast(data.success ? `${data.data}개의 콘텐츠를 수집했습니다!` : '수집 오류가 발생했습니다.')
+      queryClient.invalidateQueries({ queryKey: ['contents'] })
+    },
+    onError: () => showToast('수집 중 오류가 발생했습니다.'),
+  })
+
+  const collectOneMutation = useMutation({
+    mutationFn: ({ sourceId, full }: { sourceId: number; full: boolean }) => triggerCollectOne(sourceId, full),
     onSuccess: (data) => {
       showToast(data.success ? `${data.data}개의 콘텐츠를 수집했습니다!` : '수집 오류가 발생했습니다.')
       queryClient.invalidateQueries({ queryKey: ['contents'] })
@@ -109,6 +125,11 @@ export default function AdminPage() {
     collectMutation.mutate(full)
   }
 
+  const handleCollectOne = (source: RssSource, full: boolean) => {
+    if (!window.confirm(`[${source.siteName}] ${full ? '전체' : '최근 2일'} 수집을 실행하시겠습니까?`)) return
+    collectOneMutation.mutate({ sourceId: source.id, full })
+  }
+
   const handleDelete = (id: number) => {
     if (!window.confirm('삭제하시겠습니까?')) return
     deleteMutation.mutate(id)
@@ -132,6 +153,24 @@ export default function AdminPage() {
 
         {/* 페이지 제목 */}
         <h1 className="text-2xl font-bold text-[#111] mb-6">관리자 대시보드</h1>
+
+        {/* 접속 통계 카드 */}
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          {[
+            { label: '현재 접속자', value: accessStats?.activeNow, unit: '명', desc: '최근 5분' },
+            { label: '오늘 방문자', value: accessStats?.todayUv, unit: '명', desc: 'UV' },
+            { label: '이번달 방문자', value: accessStats?.monthUv, unit: '명', desc: 'UV' },
+          ].map(({ label, value, unit, desc }) => (
+            <div key={label} className="bg-white rounded-2xl p-4 shadow-sm border border-[#e9ecef]">
+              <p className="text-xs font-semibold text-[#888] mb-1">{label}</p>
+              <p className="text-2xl font-bold text-[#111]">
+                {value != null ? value.toLocaleString() : '—'}
+                <span className="text-sm font-normal text-[#888] ml-1">{unit}</span>
+              </p>
+              <p className="text-xs text-[#aaa] mt-0.5">{desc}</p>
+            </div>
+          ))}
+        </div>
 
         {/* 상단 카드 영역 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -245,6 +284,7 @@ export default function AdminPage() {
                       <th className="py-3 text-left text-xs font-semibold text-[#888] uppercase tracking-wide">사이트명</th>
                       <th className="py-3 text-left text-xs font-semibold text-[#888] uppercase tracking-wide">RSS URL</th>
                       <th className="py-3 text-center text-xs font-semibold text-[#888] uppercase tracking-wide">상태</th>
+                      <th className="py-3 text-center text-xs font-semibold text-[#888] uppercase tracking-wide">수집</th>
                       <th className="py-3 text-center text-xs font-semibold text-[#888] uppercase tracking-wide pr-5">작업</th>
                     </tr>
                   </thead>
@@ -270,6 +310,24 @@ export default function AdminPage() {
                             <span className={`w-1.5 h-1.5 rounded-full ${source.active ? 'bg-[#28a745]' : 'bg-[#ccc]'}`} />
                             {source.active ? '활성' : '비활성'}
                           </span>
+                        </td>
+                        <td className="py-3 text-center">
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => handleCollectOne(source, false)}
+                              disabled={collectOneMutation.isPending || !collectionRunning}
+                              className="text-xs px-2.5 py-1.5 border border-[#0d6efd] text-[#0d6efd] rounded-lg hover:bg-[#f0f4ff] disabled:opacity-40 transition-colors"
+                            >
+                              2일 수집
+                            </button>
+                            <button
+                              onClick={() => handleCollectOne(source, true)}
+                              disabled={collectOneMutation.isPending || !collectionRunning}
+                              className="text-xs px-2.5 py-1.5 border border-[#6c757d] text-[#6c757d] rounded-lg hover:bg-[#f8f9fa] disabled:opacity-40 transition-colors"
+                            >
+                              전체 수집
+                            </button>
+                          </div>
                         </td>
                         <td className="py-3 text-center pr-5">
                           <button

@@ -1,5 +1,5 @@
 import apiClient from './axios'
-import type { ApiResponse, CollectorLog, RssSource } from '../types'
+import type { AccessStats, ApiResponse, CollectorLog, RssSource } from '../types'
 
 export const getRssSources = async () => {
   const { data } = await apiClient.get<ApiResponse<RssSource[]>>('/v1/rss-sources')
@@ -23,6 +23,11 @@ export const deleteRssSource = async (id: number) => {
 
 export const triggerCollect = async (full: boolean) => {
   const { data } = await apiClient.post<ApiResponse<number>>(`/v1/collector/collect?full=${full}`)
+  return data
+}
+
+export const triggerCollectOne = async (sourceId: number, full: boolean) => {
+  const { data } = await apiClient.post<ApiResponse<number>>(`/v1/collector/collect/${sourceId}?full=${full}`)
   return data
 }
 
@@ -57,5 +62,10 @@ export const startCollection = async () => {
 
 export const resummary = async () => {
   const { data } = await apiClient.post<ApiResponse<number>>('/v1/collector/resummary')
+  return data.data
+}
+
+export const getAccessStats = async () => {
+  const { data } = await apiClient.get<ApiResponse<AccessStats>>('/v1/access-logs/stats')
   return data.data
 }

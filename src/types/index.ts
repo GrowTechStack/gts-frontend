@@ -50,3 +50,9 @@ export interface CollectorLog {
   endTime: string | null
   errorMessage: string | null
 }
+
+export interface AccessStats {
+  activeNow: number
+  todayUv: number
+  monthUv: number
+}
