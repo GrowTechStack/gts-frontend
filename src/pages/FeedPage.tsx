@@ -137,7 +137,47 @@ export default function FeedPage() {
               tags={tags}
               popularContents={popularData?.content ?? []}
               onSelectContent={(id) => navigate(`/contents/${id}`)}
+              rssSources={rssSources}
+              selectedSites={selectedSites}
+              onToggleSite={handleToggleSite}
             />
+
+            {/* 모바일 블로그 필터 칩 바 (xl 미만에서만 표시) */}
+            {!isSearchMode && (
+              <div className="xl:hidden overflow-x-auto no-scrollbar mb-3">
+                <div className="flex gap-2 w-max">
+                  <button
+                    onClick={handleResetSites}
+                    className={`shrink-0 flex items-center px-3 py-1.5 rounded-full border text-[0.8rem] font-semibold transition-colors ${
+                      selectedSites.size === 0
+                        ? 'bg-[#0d6efd] border-[#0d6efd] text-white'
+                        : 'bg-white border-[#dee2e6] text-[#555]'
+                    }`}
+                  >
+                    전체
+                  </button>
+                  {rssSources.map((source) => (
+                    <button
+                      key={source.id}
+                      onClick={() => handleToggleSite(source.siteName)}
+                      className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[0.8rem] font-semibold transition-colors ${
+                        selectedSites.has(source.siteName)
+                          ? 'bg-[#0d6efd] border-[#0d6efd] text-white'
+                          : 'bg-white border-[#dee2e6] text-[#555]'
+                      }`}
+                    >
+                      <img
+                        src={source.logoUrl ?? '/img/default-logo.svg'}
+                        alt=""
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/img/default-logo.svg' }}
+                        className="w-4 h-4 rounded-full object-cover"
+                      />
+                      {source.siteName}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* 검색 결과 헤더 */}
             {isSearchMode && (

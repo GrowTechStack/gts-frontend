@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import type { Content } from '../../types'
+import type { Content, RssSource } from '../../types'
 
 const DEFAULT_LOGO = '/img/default-logo.svg'
 
@@ -13,10 +13,16 @@ interface Props {
   tags?: string[]
   popularContents?: Content[]
   onSelectContent?: (id: number) => void
+  rssSources?: RssSource[]
+  selectedSites?: Set<string>
+  onToggleSite?: (name: string) => void
 }
 
-export default function SearchBar({ value, onChange, onSearch, onSearchQuery, onReset, isSearchMode, tags = [], popularContents = [], onSelectContent }: Props) {
+const BLOG_PREVIEW_COUNT = 5
+
+export default function SearchBar({ value, onChange, onSearch, onSearchQuery, onReset, isSearchMode, tags = [], popularContents = [], onSelectContent, rssSources = [], selectedSites = new Set(), onToggleSite }: Props) {
   const [overlayOpen, setOverlayOpen] = useState(false)
+  const [blogsExpanded, setBlogsExpanded] = useState(false)
 
   useEffect(() => {
     document.body.style.overflow = overlayOpen ? 'hidden' : ''
@@ -33,12 +39,17 @@ export default function SearchBar({ value, onChange, onSearch, onSearchQuery, on
   const handleTagClick = (tag: string) => {
     onChange(tag)
     onSearchQuery(tag)
+    closeOverlay()
+  }
+
+  const closeOverlay = () => {
     setOverlayOpen(false)
+    setBlogsExpanded(false)
   }
 
   const handleOverlaySearch = () => {
     onSearch()
-    setOverlayOpen(false)
+    closeOverlay()
   }
 
   const handleOverlayKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -82,7 +93,7 @@ export default function SearchBar({ value, onChange, onSearch, onSearchQuery, on
           {/* 상단 검색 입력 영역 */}
           <div className="flex items-center gap-2 px-3 py-3 border-b border-[#e9ecef]">
             <button
-              onClick={() => setOverlayOpen(false)}
+              onClick={closeOverlay}
               className="w-10 h-10 flex items-center justify-center text-[#333] text-xl shrink-0 -ml-1"
             >
               ←
@@ -107,6 +118,47 @@ export default function SearchBar({ value, onChange, onSearch, onSearchQuery, on
           </div>
 
           <div className="flex-1 overflow-y-auto">
+            {/* 기술 블로그 필터 */}
+            {rssSources.length > 0 && (
+              <div className="px-4 pt-5">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-[0.85rem] font-bold text-[#111]">기술 블로그</p>
+                  {selectedSites.size > 0 && (
+                    <span className="text-[0.75rem] text-[#0d6efd] font-semibold">{selectedSites.size}개 선택</span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {(blogsExpanded ? rssSources : rssSources.slice(0, BLOG_PREVIEW_COUNT)).map((source) => (
+                    <button
+                      key={source.id}
+                      onClick={() => onToggleSite?.(source.siteName)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[0.8rem] font-semibold transition-colors ${
+                        selectedSites.has(source.siteName)
+                          ? 'bg-[#0d6efd] border-[#0d6efd] text-white'
+                          : 'bg-[#f1f3f5] border-transparent text-[#333]'
+                      }`}
+                    >
+                      <img
+                        src={source.logoUrl ?? DEFAULT_LOGO}
+                        alt=""
+                        onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_LOGO }}
+                        className="w-4 h-4 rounded-full object-cover"
+                      />
+                      {source.siteName}
+                    </button>
+                  ))}
+                  {rssSources.length > BLOG_PREVIEW_COUNT && (
+                    <button
+                      onClick={() => setBlogsExpanded((v) => !v)}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-[#dee2e6] text-[0.8rem] text-[#666] bg-white transition-colors"
+                    >
+                      {blogsExpanded ? '접기 ↑' : `+${rssSources.length - BLOG_PREVIEW_COUNT}개 더보기`}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* 추천 검색어 */}
             {tags.length > 0 && (
               <div className="px-4 pt-5">
@@ -133,7 +185,7 @@ export default function SearchBar({ value, onChange, onSearch, onSearchQuery, on
                   {popularContents.map((content, index) => (
                     <li key={content.id}>
                       <button
-                        onClick={() => { onSelectContent?.(content.id); setOverlayOpen(false) }}
+                        onClick={() => { onSelectContent?.(content.id); closeOverlay() }}
                         className="w-full flex items-center gap-3 py-3 border-b border-[#f1f3f5] last:border-0 text-left"
                       >
                         <span className={`w-5 shrink-0 text-center text-sm font-bold ${

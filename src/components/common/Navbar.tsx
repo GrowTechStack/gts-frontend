@@ -7,11 +7,7 @@ export default function Navbar() {
         <Link to="/" className="text-[#0d6efd] font-bold text-lg">
           GrowTechStack
         </Link>
-        <div className="flex items-center gap-4">
-          <Link to="/" className="text-[#555] text-sm hover:text-[#0d6efd] transition-colors">
-            국내 IT 기업 기술 블로그 모음
-          </Link>
-        </div>
+        <span className="text-[#555] text-sm">국내 IT 기업 기술 블로그 모음</span>
       </div>
     </nav>
   )
