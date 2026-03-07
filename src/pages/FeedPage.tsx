@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getContents, searchContents } from '../api/contents'
+import { useNavigate } from 'react-router-dom'
 import { getRssSources } from '../api/rss'
 import { getTags } from '../api/tags'
 import ContentCard from '../components/content/ContentCard'
@@ -24,6 +25,7 @@ function markAsRead(id: number) {
 }
 
 export default function FeedPage() {
+  const navigate = useNavigate()
   const [page, setPage] = useState(0)
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
   const [selectedSites, setSelectedSites] = useState<Set<string>>(new Set())
@@ -64,6 +66,12 @@ export default function FeedPage() {
     staleTime: 1000 * 60 * 10,
   })
 
+  const { data: popularData } = useQuery({
+    queryKey: ['contents-popular'],
+    queryFn: () => getContents({ size: 5, sort: 'viewCount,desc' }),
+    staleTime: 1000 * 60 * 10,
+  })
+
   const siteLogos: Record<string, string> = {}
   rssSources.forEach((s) => { if (s.logoUrl) siteLogos[s.siteName] = s.logoUrl })
 
@@ -80,6 +88,12 @@ export default function FeedPage() {
   const handleReset = () => {
     setSearchInput('')
     setSearchQuery('')
+    setSearchPage(0)
+  }
+
+  const handleSearchWithQuery = (query: string) => {
+    setSearchInput(query)
+    setSearchQuery(query.trim())
     setSearchPage(0)
   }
 
@@ -117,8 +131,12 @@ export default function FeedPage() {
               value={searchInput}
               onChange={setSearchInput}
               onSearch={() => handleSearch()}
+              onSearchQuery={handleSearchWithQuery}
               onReset={handleReset}
               isSearchMode={isSearchMode}
+              tags={tags}
+              popularContents={popularData?.content ?? []}
+              onSelectContent={(id) => navigate(`/contents/${id}`)}
             />
 
             {/* 검색 결과 헤더 */}
