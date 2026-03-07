@@ -4,13 +4,13 @@ import {
   getRssSources, addRssSource, updateRssSource, deleteRssSource,
   triggerCollect, triggerCollectOne, getLogs, getFailureLogs,
   getCollectionStatus, stopCollection, startCollection, resummary,
-  getAccessStats,
+  getAccessStats, getAccessLogs,
 } from '../api/rss'
 import type { RssSource } from '../types'
 
 const DEFAULT_LOGO = '/img/default-logo.svg'
 
-type Tab = 'sources' | 'logs'
+type Tab = 'sources' | 'logs' | 'access-logs'
 type LogFilter = 'all' | 'failures'
 
 type EditState = {
@@ -63,6 +63,13 @@ export default function AdminPage() {
     queryKey: ['logs', logFilter],
     queryFn: logFilter === 'failures' ? getFailureLogs : getLogs,
     enabled: tab === 'logs',
+  })
+
+  const { data: accessLogs = [], isLoading: accessLogsLoading } = useQuery({
+    queryKey: ['access-logs'],
+    queryFn: getAccessLogs,
+    enabled: tab === 'access-logs',
+    refetchInterval: 10_000,
   })
 
   const collectMutation = useMutation({
@@ -257,7 +264,7 @@ export default function AdminPage() {
 
         {/* 탭 네비게이션 */}
         <div className="flex gap-1 mb-4 bg-white rounded-xl p-1 shadow-sm border border-[#e9ecef] w-fit">
-          {(['sources', 'logs'] as Tab[]).map((t) => (
+          {(['sources', 'logs', 'access-logs'] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -267,7 +274,7 @@ export default function AdminPage() {
                   : 'text-[#6c757d] hover:text-[#212529]'
               }`}
             >
-              {t === 'sources' ? 'RSS 출처 관리' : '수집 로그'}
+              {t === 'sources' ? 'RSS 출처 관리' : t === 'logs' ? '수집 로그' : '접속 로그'}
             </button>
           ))}
         </div>
@@ -484,6 +491,47 @@ export default function AdminPage() {
               </div>
             </div>
           </>
+        )}
+
+        {/* 탭: 접속 로그 */}
+        {tab === 'access-logs' && (
+          <div className="bg-white rounded-2xl shadow-sm border border-[#e9ecef] overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-[#f1f3f5]">
+              <p className="text-xs text-[#888]">최근 100건 · 10초마다 갱신</p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[#f1f3f5] bg-[#f8f9fa]">
+                    <th className="py-3 pl-5 text-left text-xs font-semibold text-[#888] uppercase tracking-wide">IP</th>
+                    <th className="py-3 text-left text-xs font-semibold text-[#888] uppercase tracking-wide">해시 IP</th>
+                    <th className="py-3 text-left text-xs font-semibold text-[#888] uppercase tracking-wide">경로</th>
+                    <th className="py-3 text-left text-xs font-semibold text-[#888] uppercase tracking-wide pr-5">접속 시간</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {accessLogsLoading ? (
+                    <tr>
+                      <td colSpan={3} className="text-center text-[#888] py-12 text-sm">로그를 불러오는 중...</td>
+                    </tr>
+                  ) : accessLogs.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="text-center text-[#888] py-12 text-sm">접속 로그가 없습니다.</td>
+                    </tr>
+                  ) : accessLogs.map((log, i) => (
+                    <tr key={i} className="border-b border-[#f8f9fa] hover:bg-[#fafbff] transition-colors">
+                      <td className="py-2.5 pl-5 font-mono text-xs text-[#333]">{log.rawIp ?? '-'}</td>
+                      <td className="py-2.5 font-mono text-xs text-[#aaa]">{log.hashedIp}</td>
+                      <td className="py-2.5 text-xs text-[#333] max-w-[320px] truncate">{log.path}</td>
+                      <td className="py-2.5 text-xs text-[#888] pr-5 whitespace-nowrap">
+                        {new Date(log.createdAt).toLocaleString('ko-KR')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         )}
       </div>
 

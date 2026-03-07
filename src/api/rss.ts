@@ -1,5 +1,5 @@
 import apiClient from './axios'
-import type { AccessStats, ApiResponse, CollectorLog, RssSource } from '../types'
+import type { AccessLog, AccessStats, ApiResponse, CollectorLog, RssSource } from '../types'
 
 export const getRssSources = async () => {
   const { data } = await apiClient.get<ApiResponse<RssSource[]>>('/v1/rss-sources')
@@ -67,5 +67,10 @@ export const resummary = async () => {
 
 export const getAccessStats = async () => {
   const { data } = await apiClient.get<ApiResponse<AccessStats>>('/v1/access-logs/stats')
+  return data.data
+}
+
+export const getAccessLogs = async () => {
+  const { data } = await apiClient.get<ApiResponse<AccessLog[]>>('/v1/access-logs/recent')
   return data.data
 }

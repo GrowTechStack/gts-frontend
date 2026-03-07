@@ -56,3 +56,10 @@ export interface AccessStats {
   todayUv: number
   monthUv: number
 }
+
+export interface AccessLog {
+  hashedIp: string
+  rawIp: string | null
+  path: string
+  createdAt: string
+}
