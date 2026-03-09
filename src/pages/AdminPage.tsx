@@ -17,6 +17,7 @@ type EditState = {
   id: number
   siteName: string
   rssUrl: string
+  siteUrl: string
   logoUrl: string
   active: boolean
 }
@@ -27,7 +28,7 @@ export default function AdminPage() {
   const [logFilter, setLogFilter] = useState<LogFilter>('all')
   const [toast, setToast] = useState<string | null>(null)
   const [editState, setEditState] = useState<EditState | null>(null)
-  const [addForm, setAddForm] = useState({ siteName: '', rssUrl: '', logoUrl: '' })
+  const [addForm, setAddForm] = useState({ siteName: '', rssUrl: '', siteUrl: '', logoUrl: '' })
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -100,7 +101,7 @@ export default function AdminPage() {
     mutationFn: () => addRssSource({ ...addForm, active: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rss-sources'] })
-      setAddForm({ siteName: '', rssUrl: '', logoUrl: '' })
+      setAddForm({ siteName: '', rssUrl: '', siteUrl: '', logoUrl: '' })
       showToast('출처가 등록되었습니다.')
     },
   })
@@ -109,6 +110,7 @@ export default function AdminPage() {
     mutationFn: () => updateRssSource(editState!.id, {
       siteName: editState!.siteName,
       rssUrl: editState!.rssUrl,
+      siteUrl: editState!.siteUrl,
       logoUrl: editState!.logoUrl,
       active: editState!.active,
     }),
@@ -147,6 +149,7 @@ export default function AdminPage() {
       id: source.id,
       siteName: source.siteName,
       rssUrl: source.rssUrl,
+      siteUrl: source.siteUrl ?? '',
       logoUrl: source.logoUrl ?? '',
       active: source.active,
     })
@@ -386,6 +389,16 @@ export default function AdminPage() {
                     className="w-full border border-[#e9ecef] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#0d6efd] transition-colors"
                   />
                 </div>
+                <div className="flex-[2] min-w-[200px]">
+                  <label className="block text-xs font-semibold mb-1.5 text-[#555]">사이트 URL</label>
+                  <input
+                    type="url"
+                    value={addForm.siteUrl}
+                    onChange={(e) => setAddForm((f) => ({ ...f, siteUrl: e.target.value }))}
+                    placeholder="https://toss.tech"
+                    className="w-full border border-[#e9ecef] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#0d6efd] transition-colors"
+                  />
+                </div>
                 <div className="flex-1 min-w-[140px]">
                   <label className="block text-xs font-semibold mb-1.5 text-[#555]">로고 아이콘 URL</label>
                   <input
@@ -606,6 +619,15 @@ export default function AdminPage() {
                   type="url"
                   value={editState.rssUrl}
                   onChange={(e) => setEditState((s) => s && ({ ...s, rssUrl: e.target.value }))}
+                  className="w-full border border-[#e9ecef] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#0d6efd] transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold mb-1.5 text-[#555]">사이트 URL</label>
+                <input
+                  type="url"
+                  value={editState.siteUrl}
+                  onChange={(e) => setEditState((s) => s && ({ ...s, siteUrl: e.target.value }))}
                   className="w-full border border-[#e9ecef] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#0d6efd] transition-colors"
                 />
               </div>

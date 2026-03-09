@@ -6,12 +6,12 @@ export const getRssSources = async () => {
   return data.data
 }
 
-export const addRssSource = async (body: { siteName: string; rssUrl: string; logoUrl: string; active: boolean }) => {
+export const addRssSource = async (body: { siteName: string; rssUrl: string; siteUrl: string; logoUrl: string; active: boolean }) => {
   const { data } = await apiClient.post<ApiResponse<RssSource>>('/v1/rss-sources', body)
   return data
 }
 
-export const updateRssSource = async (id: number, body: { siteName: string; rssUrl: string; logoUrl: string; active: boolean }) => {
+export const updateRssSource = async (id: number, body: { siteName: string; rssUrl: string; siteUrl: string; logoUrl: string; active: boolean }) => {
   const { data } = await apiClient.put<ApiResponse<RssSource>>(`/v1/rss-sources/${id}`, body)
   return data
 }
