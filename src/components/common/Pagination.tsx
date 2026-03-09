@@ -7,7 +7,7 @@ interface Props {
 }
 
 export default function Pagination({ currentPage, totalPages, onPageChange, first, last }: Props) {
-  if (totalPages <= 1) return null
+  if (totalPages === 0) return null
 
   const start = Math.max(0, Math.min(currentPage - 2, totalPages - 5))
   const end = Math.min(totalPages - 1, start + 4)
