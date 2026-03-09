@@ -9,9 +9,10 @@ interface Props {
   siteLogos: Record<string, string>
   isRead: boolean
   onRead: (id: number) => void
+  compact?: boolean
 }
 
-export default function ContentCard({ content, siteLogos, isRead, onRead }: Props) {
+export default function ContentCard({ content, siteLogos, isRead, onRead, compact = false }: Props) {
   const tags = content.tags ? content.tags.split(',').map((t) => t.trim()).filter(Boolean) : []
   const logo = siteLogos[content.siteName] ?? DEFAULT_LOGO
   const dateStr = new Date(content.publishedAt).toLocaleDateString('ko-KR', {
@@ -36,14 +37,14 @@ export default function ContentCard({ content, siteLogos, isRead, onRead }: Prop
           </h5>
 
           {/* 요약 */}
-          {content.summary && (
+          {!compact && content.summary && (
             <p className="text-secondary text-[0.875rem] leading-[1.55] mb-3 line-clamp-2">
               {content.summary}
             </p>
           )}
 
           {/* 태그 */}
-          {tags.length > 0 && (
+          {!compact && tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-0">
               {tags.map((tag) => (
                 <span
@@ -79,7 +80,7 @@ export default function ContentCard({ content, siteLogos, isRead, onRead }: Prop
         </div>
 
         {/* 썸네일 */}
-        <div className="hidden md:block w-[140px] h-[95px] ml-5 shrink-0">
+        <div className={`${compact ? 'hidden' : 'hidden md:block'} w-[140px] h-[95px] ml-5 shrink-0`}>
           <img
             src={content.thumbnailUrl ?? DEFAULT_THUMBNAIL}
             alt="thumbnail"

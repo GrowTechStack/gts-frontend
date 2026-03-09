@@ -33,20 +33,23 @@ export default function FeedPage() {
   const [searchInput, setSearchInput] = useState('')
   const [searchPage, setSearchPage] = useState(0)
   const [readIds, setReadIds] = useState<number[]>(getReadIds)
+  const [viewMode, setViewMode] = useState<'detailed' | 'compact'>('detailed')
+  const [sort, setSort] = useState<'publishedAt,desc' | 'publishedAt,asc' | 'viewCount,desc'>('publishedAt,desc')
 
   const isSearchMode = searchQuery.length > 0
 
   const { data: feedData, isLoading: feedLoading } = useQuery({
-    queryKey: ['contents', page, selectedTag, [...selectedSites].sort()],
+    queryKey: ['contents', page, selectedTag, [...selectedSites].sort(), sort],
     queryFn: () =>
       getContents({
         page,
         size: 12,
         tag: selectedTag ?? undefined,
         sites: selectedSites.size > 0 ? [...selectedSites] : undefined,
-        sort: 'publishedAt,desc',
+        sort,
       }),
     enabled: !isSearchMode,
+    placeholderData: (prev) => prev,
   })
 
   const { data: searchData, isLoading: searchLoading } = useQuery({
@@ -195,6 +198,54 @@ export default function FeedPage() {
               />
             )}
 
+            {/* 정렬 + 뷰 모드 토글 */}
+            <div className="flex items-center justify-between mb-3">
+              {!isSearchMode ? (
+                <div className="flex gap-1 bg-card border border-line-lt rounded-lg p-1">
+                  {([
+                    { value: 'publishedAt,desc', label: '최신순' },
+                    { value: 'publishedAt,asc',  label: '오래된순' },
+                    { value: 'viewCount,desc',   label: '조회수순' },
+                  ] as const).map(({ value, label }) => (
+                    <button
+                      key={value}
+                      onClick={() => { setSort(value); setPage(0) }}
+                      className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${sort === value ? 'bg-brand text-white' : 'text-muted hover:text-heading'}`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              ) : <div />}
+
+              {/* 뷰 모드 토글 (모바일 숨김) */}
+              <div className="flex gap-1 bg-card border border-line-lt rounded-lg p-1 shrink-0">
+                <button
+                  onClick={() => setViewMode('detailed')}
+                  title="자세히"
+                  className={`p-1.5 rounded-md transition-colors ${viewMode === 'detailed' ? 'bg-brand text-white' : 'text-muted hover:text-heading'}`}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <rect x="1" y="1" width="9" height="6" rx="1"/>
+                    <rect x="12" y="1" width="3" height="6" rx="1"/>
+                    <rect x="1" y="9" width="14" height="2" rx="0.5"/>
+                    <rect x="1" y="13" width="10" height="2" rx="0.5"/>
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setViewMode('compact')}
+                  title="간략히"
+                  className={`p-1.5 rounded-md transition-colors ${viewMode === 'compact' ? 'bg-brand text-white' : 'text-muted hover:text-heading'}`}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <rect x="1" y="2" width="14" height="2" rx="0.5"/>
+                    <rect x="1" y="7" width="14" height="2" rx="0.5"/>
+                    <rect x="1" y="12" width="14" height="2" rx="0.5"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
             {/* 콘텐츠 목록 */}
             {isLoading ? (
               <div className="flex justify-center py-20">
@@ -212,6 +263,7 @@ export default function FeedPage() {
                   siteLogos={siteLogos}
                   isRead={readIds.includes(item.id)}
                   onRead={handleRead}
+                  compact={viewMode === 'compact'}
                 />
               ))
             )}
