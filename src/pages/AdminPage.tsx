@@ -4,6 +4,7 @@ import {
   getRssSources, addRssSource, updateRssSource, deleteRssSource,
   triggerCollect, triggerCollectOne, getLogs, getFailureLogs,
   getCollectionStatus, stopCollection, startCollection, resummary,
+  recollectBodies, recollectBodiesOne,
   getAccessStats, getAccessLogs,
 } from '../api/rss'
 import type { RssSource } from '../types'
@@ -95,6 +96,18 @@ export default function AdminPage() {
     mutationFn: resummary,
     onSuccess: (count) => showToast(`${count}개의 콘텐츠에 요약 요청을 전송했습니다.`),
     onError: () => showToast('재요약 요청 중 오류가 발생했습니다.'),
+  })
+
+  const recollectBodiesMutation = useMutation({
+    mutationFn: recollectBodies,
+    onSuccess: (count) => showToast(`${count}개의 콘텐츠 본문을 재수집했습니다.`),
+    onError: () => showToast('본문 재수집 중 오류가 발생했습니다.'),
+  })
+
+  const recollectBodiesOneMutation = useMutation({
+    mutationFn: (sourceId: number) => recollectBodiesOne(sourceId),
+    onSuccess: (count) => showToast(`${count}개의 콘텐츠 본문을 재수집했습니다.`),
+    onError: () => showToast('본문 재수집 중 오류가 발생했습니다.'),
   })
 
   const addMutation = useMutation({
@@ -261,6 +274,16 @@ export default function AdminPage() {
               >
                 미요약 재처리
               </button>
+              <button
+                onClick={() => {
+                  if (!window.confirm('본문(body)이 없는 모든 콘텐츠의 본문을 재수집하시겠습니까? (수집 후 AI 요약이 자동 진행됩니다)')) return
+                  recollectBodiesMutation.mutate()
+                }}
+                disabled={recollectBodiesMutation.isPending || !collectionRunning}
+                className="flex-1 min-w-[100px] px-3 py-2 border border-[#fd7e14] text-[#fd7e14] text-sm font-bold rounded-lg hover:bg-[#fff5eb] disabled:opacity-40 transition-colors"
+              >
+                전체 본문 재수집
+              </button>
             </div>
           </div>
         </div>
@@ -336,6 +359,16 @@ export default function AdminPage() {
                               className="text-xs px-2.5 py-1.5 border border-[#6c757d] text-[#6c757d] rounded-lg hover:bg-[#f8f9fa] disabled:opacity-40 transition-colors"
                             >
                               전체 수집
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (!window.confirm(`[${source.siteName}] 본문이 없는 콘텐츠의 본문을 재수집하시겠습니까?`)) return
+                                recollectBodiesOneMutation.mutate(source.id)
+                              }}
+                              disabled={recollectBodiesOneMutation.isPending || !collectionRunning}
+                              className="text-xs px-2.5 py-1.5 border border-[#fd7e14] text-[#fd7e14] rounded-lg hover:bg-[#fff5eb] disabled:opacity-40 transition-colors"
+                            >
+                              본문 재수집
                             </button>
                           </div>
                         </td>

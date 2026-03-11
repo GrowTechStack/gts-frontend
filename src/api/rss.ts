@@ -65,6 +65,16 @@ export const resummary = async () => {
   return data.data
 }
 
+export const recollectBodies = async () => {
+  const { data } = await apiClient.post<ApiResponse<number>>('/v1/collector/recollect-bodies')
+  return data.data
+}
+
+export const recollectBodiesOne = async (sourceId: number) => {
+  const { data } = await apiClient.post<ApiResponse<number>>(`/v1/collector/recollect-bodies/${sourceId}`)
+  return data.data
+}
+
 export const getAccessStats = async () => {
   const { data } = await apiClient.get<ApiResponse<AccessStats>>('/v1/access-logs/stats')
   return data.data
