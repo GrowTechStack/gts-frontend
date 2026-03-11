@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuthStore } from '../../store/authStore'
+import { logout } from '../../api/auth'
 
 interface Props {
   dark: boolean
@@ -6,6 +8,18 @@ interface Props {
 }
 
 export default function Navbar({ dark, onToggle }: Props) {
+  const navigate = useNavigate()
+  const { user, accessToken, logout: clearAuth } = useAuthStore()
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } finally {
+      clearAuth()
+      navigate('/')
+    }
+  }
+
   return (
     <nav className="sticky top-0 z-50 bg-card border-b border-line">
       <div className="max-w-[1140px] mx-auto px-4 h-14 flex items-center justify-between">
@@ -14,6 +28,34 @@ export default function Navbar({ dark, onToggle }: Props) {
         </Link>
         <div className="flex items-center gap-3">
           <span className="text-secondary text-sm hidden sm:block">국내 IT 기업 기술 블로그 모음</span>
+
+          {accessToken ? (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-secondary hidden sm:block">{user?.nickname}</span>
+              <button
+                onClick={handleLogout}
+                className="text-xs px-3 py-1.5 border border-line rounded-lg text-muted hover:text-heading hover:border-brand transition-colors"
+              >
+                로그아웃
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link
+                to="/login"
+                className="text-xs px-3 py-1.5 border border-line rounded-lg text-muted hover:text-heading hover:border-brand transition-colors"
+              >
+                로그인
+              </Link>
+              <Link
+                to="/signup"
+                className="text-xs px-3 py-1.5 bg-brand text-white rounded-lg hover:bg-brand-h transition-colors font-semibold"
+              >
+                회원가입
+              </Link>
+            </div>
+          )}
+
           <button
             onClick={onToggle}
             aria-label="테마 전환"

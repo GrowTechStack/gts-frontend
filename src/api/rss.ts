@@ -6,12 +6,12 @@ export const getRssSources = async () => {
   return data.data
 }
 
-export const addRssSource = async (body: { siteName: string; rssUrl: string; logoUrl: string; active: boolean }) => {
+export const addRssSource = async (body: { siteName: string; rssUrl: string; siteUrl: string; logoUrl: string; active: boolean }) => {
   const { data } = await apiClient.post<ApiResponse<RssSource>>('/v1/rss-sources', body)
   return data
 }
 
-export const updateRssSource = async (id: number, body: { siteName: string; rssUrl: string; logoUrl: string; active: boolean }) => {
+export const updateRssSource = async (id: number, body: { siteName: string; rssUrl: string; siteUrl: string; logoUrl: string; active: boolean }) => {
   const { data } = await apiClient.put<ApiResponse<RssSource>>(`/v1/rss-sources/${id}`, body)
   return data
 }
@@ -62,6 +62,16 @@ export const startCollection = async () => {
 
 export const resummary = async () => {
   const { data } = await apiClient.post<ApiResponse<number>>('/v1/collector/resummary')
+  return data.data
+}
+
+export const recollectBodies = async () => {
+  const { data } = await apiClient.post<ApiResponse<number>>('/v1/collector/recollect-bodies')
+  return data.data
+}
+
+export const recollectBodiesOne = async (sourceId: number) => {
+  const { data } = await apiClient.post<ApiResponse<number>>(`/v1/collector/recollect-bodies/${sourceId}`)
   return data.data
 }
 

@@ -4,6 +4,7 @@ import {
   getRssSources, addRssSource, updateRssSource, deleteRssSource,
   triggerCollect, triggerCollectOne, getLogs, getFailureLogs,
   getCollectionStatus, stopCollection, startCollection, resummary,
+  recollectBodies, recollectBodiesOne,
   getAccessStats, getAccessLogs,
 } from '../api/rss'
 import type { RssSource } from '../types'
@@ -17,6 +18,7 @@ type EditState = {
   id: number
   siteName: string
   rssUrl: string
+  siteUrl: string
   logoUrl: string
   active: boolean
 }
@@ -27,7 +29,7 @@ export default function AdminPage() {
   const [logFilter, setLogFilter] = useState<LogFilter>('all')
   const [toast, setToast] = useState<string | null>(null)
   const [editState, setEditState] = useState<EditState | null>(null)
-  const [addForm, setAddForm] = useState({ siteName: '', rssUrl: '', logoUrl: '' })
+  const [addForm, setAddForm] = useState({ siteName: '', rssUrl: '', siteUrl: '', logoUrl: '' })
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -96,11 +98,23 @@ export default function AdminPage() {
     onError: () => showToast('재요약 요청 중 오류가 발생했습니다.'),
   })
 
+  const recollectBodiesMutation = useMutation({
+    mutationFn: recollectBodies,
+    onSuccess: (count) => showToast(`${count}개의 콘텐츠 본문을 재수집했습니다.`),
+    onError: () => showToast('본문 재수집 중 오류가 발생했습니다.'),
+  })
+
+  const recollectBodiesOneMutation = useMutation({
+    mutationFn: (sourceId: number) => recollectBodiesOne(sourceId),
+    onSuccess: (count) => showToast(`${count}개의 콘텐츠 본문을 재수집했습니다.`),
+    onError: () => showToast('본문 재수집 중 오류가 발생했습니다.'),
+  })
+
   const addMutation = useMutation({
     mutationFn: () => addRssSource({ ...addForm, active: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rss-sources'] })
-      setAddForm({ siteName: '', rssUrl: '', logoUrl: '' })
+      setAddForm({ siteName: '', rssUrl: '', siteUrl: '', logoUrl: '' })
       showToast('출처가 등록되었습니다.')
     },
   })
@@ -109,6 +123,7 @@ export default function AdminPage() {
     mutationFn: () => updateRssSource(editState!.id, {
       siteName: editState!.siteName,
       rssUrl: editState!.rssUrl,
+      siteUrl: editState!.siteUrl,
       logoUrl: editState!.logoUrl,
       active: editState!.active,
     }),
@@ -147,6 +162,7 @@ export default function AdminPage() {
       id: source.id,
       siteName: source.siteName,
       rssUrl: source.rssUrl,
+      siteUrl: source.siteUrl ?? '',
       logoUrl: source.logoUrl ?? '',
       active: source.active,
     })
@@ -258,6 +274,16 @@ export default function AdminPage() {
               >
                 미요약 재처리
               </button>
+              <button
+                onClick={() => {
+                  if (!window.confirm('본문(body)이 없는 모든 콘텐츠의 본문을 재수집하시겠습니까? (수집 후 AI 요약이 자동 진행됩니다)')) return
+                  recollectBodiesMutation.mutate()
+                }}
+                disabled={recollectBodiesMutation.isPending || !collectionRunning}
+                className="flex-1 min-w-[100px] px-3 py-2 border border-[#fd7e14] text-[#fd7e14] text-sm font-bold rounded-lg hover:bg-[#fff5eb] disabled:opacity-40 transition-colors"
+              >
+                전체 본문 재수집
+              </button>
             </div>
           </div>
         </div>
@@ -334,6 +360,16 @@ export default function AdminPage() {
                             >
                               전체 수집
                             </button>
+                            <button
+                              onClick={() => {
+                                if (!window.confirm(`[${source.siteName}] 본문이 없는 콘텐츠의 본문을 재수집하시겠습니까?`)) return
+                                recollectBodiesOneMutation.mutate(source.id)
+                              }}
+                              disabled={recollectBodiesOneMutation.isPending || !collectionRunning}
+                              className="text-xs px-2.5 py-1.5 border border-[#fd7e14] text-[#fd7e14] rounded-lg hover:bg-[#fff5eb] disabled:opacity-40 transition-colors"
+                            >
+                              본문 재수집
+                            </button>
                           </div>
                         </td>
                         <td className="py-3 text-center pr-5">
@@ -383,6 +419,16 @@ export default function AdminPage() {
                     onChange={(e) => setAddForm((f) => ({ ...f, rssUrl: e.target.value }))}
                     placeholder="https://..."
                     required
+                    className="w-full border border-[#e9ecef] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#0d6efd] transition-colors"
+                  />
+                </div>
+                <div className="flex-[2] min-w-[200px]">
+                  <label className="block text-xs font-semibold mb-1.5 text-[#555]">사이트 URL</label>
+                  <input
+                    type="url"
+                    value={addForm.siteUrl}
+                    onChange={(e) => setAddForm((f) => ({ ...f, siteUrl: e.target.value }))}
+                    placeholder="https://toss.tech"
                     className="w-full border border-[#e9ecef] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#0d6efd] transition-colors"
                   />
                 </div>
@@ -606,6 +652,15 @@ export default function AdminPage() {
                   type="url"
                   value={editState.rssUrl}
                   onChange={(e) => setEditState((s) => s && ({ ...s, rssUrl: e.target.value }))}
+                  className="w-full border border-[#e9ecef] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#0d6efd] transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold mb-1.5 text-[#555]">사이트 URL</label>
+                <input
+                  type="url"
+                  value={editState.siteUrl}
+                  onChange={(e) => setEditState((s) => s && ({ ...s, siteUrl: e.target.value }))}
                   className="w-full border border-[#e9ecef] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#0d6efd] transition-colors"
                 />
               </div>

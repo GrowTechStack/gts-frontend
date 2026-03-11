@@ -57,6 +57,19 @@ export interface AccessStats {
   monthUv: number
 }
 
+export interface AuthUser {
+  id: number
+  email: string
+  nickname: string
+  role: string
+  provider: string
+}
+
+export interface TokenResponse {
+  accessToken: string
+  refreshToken: string
+}
+
 export interface AccessLog {
   hashedIp: string
   rawIp: string | null
