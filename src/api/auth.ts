@@ -1,8 +1,8 @@
 import apiClient from './axios'
 import type { ApiResponse, AuthUser, TokenResponse } from '../types'
 
-export const signup = async (email: string, password: string, nickname: string) => {
-  const { data } = await apiClient.post<ApiResponse<null>>('/v1/auth/signup', { email, password, nickname })
+export const signup = async (email: string, password: string, nickname: string, agreedToPrivacyPolicy: boolean) => {
+  const { data } = await apiClient.post<ApiResponse<null>>('/v1/auth/signup', { email, password, nickname, agreedToPrivacyPolicy })
   return data
 }
 
