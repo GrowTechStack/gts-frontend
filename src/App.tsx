@@ -6,6 +6,7 @@ import ContentDetailPage from './pages/ContentDetailPage'
 import AdminPage from './pages/AdminPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
+import MyPage from './pages/MyPage'
 import { useTheme } from './hooks/useTheme'
 import { useAuthStore } from './store/authStore'
 import { getMe } from './api/auth'
@@ -25,6 +26,12 @@ function AdminRoute() {
   if (!user) return null
   if (user.role !== 'ADMIN') return <Navigate to="/" replace />
   return <AdminPage />
+}
+
+function PrivateRoute({ children }: { children: React.ReactNode }) {
+  const { accessToken } = useAuthStore()
+  if (!accessToken) return <Navigate to="/login" replace />
+  return <>{children}</>
 }
 
 function AuthLoader() {
@@ -57,6 +64,7 @@ export default function App() {
           <Route path="/admin" element={<AdminRoute />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
         </Routes>
         <footer className="mt-12 py-5 bg-page border-t border-line text-muted text-sm">
           <div className="max-w-[1140px] mx-auto px-4 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-3">

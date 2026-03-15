@@ -31,7 +31,7 @@ export default function Navbar({ dark, onToggle }: Props) {
 
           {accessToken ? (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-secondary hidden sm:block">{user?.nickname}</span>
+              <Link to="/mypage" className="text-sm text-secondary hidden sm:block hover:text-heading transition-colors">{user?.nickname}</Link>
               <button
                 onClick={handleLogout}
                 className="text-xs px-3 py-1.5 border border-line rounded-lg text-muted hover:text-heading hover:border-brand transition-colors"

@@ -1,19 +1,23 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
-import { login } from '../api/auth'
+import { login, getMe } from '../api/auth'
 import { useAuthStore } from '../store/authStore'
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const { setTokens } = useAuthStore()
+  const { setTokens, setUser } = useAuthStore()
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState<string | null>(null)
 
   const mutation = useMutation({
     mutationFn: () => login(form.email, form.password),
-    onSuccess: (tokens) => {
+    onSuccess: async (tokens) => {
       setTokens(tokens.accessToken, tokens.refreshToken)
+      try {
+        const user = await getMe()
+        setUser(user)
+      } catch {}
       navigate('/')
     },
     onError: () => setError('이메일 또는 비밀번호가 올바르지 않습니다.'),

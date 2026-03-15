@@ -75,12 +75,22 @@ function PrivacyPolicyModal({ onClose }: { onClose: () => void }) {
   )
 }
 
+const PASSWORD_RULES = [
+  { label: '8자 이상', test: (v: string) => v.length >= 8 },
+  { label: '영문 포함', test: (v: string) => /[A-Za-z]/.test(v) },
+  { label: '숫자 포함', test: (v: string) => /\d/.test(v) },
+  { label: '특수문자 포함', test: (v: string) => /[@$!%*#?&]/.test(v) },
+]
+
 export default function SignupPage() {
   const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '', passwordConfirm: '', nickname: '' })
   const [agreedToPrivacyPolicy, setAgreedToPrivacyPolicy] = useState(false)
   const [showPrivacy, setShowPrivacy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [passwordTouched, setPasswordTouched] = useState(false)
+
+  const passwordValid = PASSWORD_RULES.every((r) => r.test(form.password))
 
   const mutation = useMutation({
     mutationFn: () => signup(form.email, form.password, form.nickname, agreedToPrivacyPolicy),
@@ -95,6 +105,10 @@ export default function SignupPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    if (!passwordValid) {
+      setError('비밀번호 조건을 모두 충족해 주세요.')
+      return
+    }
     if (form.password !== form.passwordConfirm) {
       setError('비밀번호가 일치하지 않습니다.')
       return
@@ -125,16 +139,29 @@ export default function SignupPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-secondary mb-1.5">비밀번호 <span className="text-muted font-normal">(8자 이상)</span></label>
+              <label className="block text-xs font-semibold text-secondary mb-1.5">비밀번호</label>
               <input
                 type="password"
                 value={form.password}
                 onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                placeholder="8자 이상 입력"
+                onFocus={() => setPasswordTouched(true)}
+                placeholder="영문, 숫자, 특수문자 포함 8자 이상"
                 required
-                minLength={8}
                 className="w-full border border-line rounded-lg px-3 py-2.5 text-sm bg-page text-heading outline-none focus:border-brand transition-colors"
               />
+              {passwordTouched && (
+                <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+                  {PASSWORD_RULES.map((rule) => {
+                    const ok = rule.test(form.password)
+                    return (
+                      <li key={rule.label} className={`flex items-center gap-1 text-xs ${ok ? 'text-green-500' : 'text-muted'}`}>
+                        <span>{ok ? '✓' : '·'}</span>
+                        {rule.label}
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
             </div>
             <div>
               <label className="block text-xs font-semibold text-secondary mb-1.5">비밀번호 확인</label>

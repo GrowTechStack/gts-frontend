@@ -24,3 +24,7 @@ export const getMe = async () => {
   const { data } = await apiClient.get<ApiResponse<AuthUser>>('/v1/auth/me')
   return data.data
 }
+
+export const withdraw = async () => {
+  await apiClient.delete('/v1/auth/withdraw')
+}
