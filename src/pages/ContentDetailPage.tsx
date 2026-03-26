@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getContent } from '../api/contents'
 import { getRssSources } from '../api/rss'
@@ -9,6 +9,8 @@ const DEFAULT_THUMBNAIL = '/img/default-thumbnail.svg'
 export default function ContentDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
+  const canGoBack = location.key !== 'default'
 
   const { data: content, isLoading } = useQuery({
     queryKey: ['content', id],
@@ -53,7 +55,7 @@ export default function ContentDetailPage() {
             {/* 뒤로가기 */}
             <nav className="mb-4">
               <button
-                onClick={() => navigate(-1)}
+                onClick={() => canGoBack ? navigate(-1) : navigate('/')}
                 className="text-muted text-sm hover:text-brand transition-colors"
               >
                 ← 목록으로 돌아가기

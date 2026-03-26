@@ -27,7 +27,7 @@ function markAsRead(id: number) {
 export default function FeedPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const page = Number(searchParams.get('page') ?? '0')
+  const page = Math.max(0, parseInt(searchParams.get('page') ?? '0', 10) || 0)
   const setPage = useCallback((p: number) => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev)
