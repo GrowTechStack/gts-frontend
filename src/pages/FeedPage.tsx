@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getContents, searchContents } from '../api/contents'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getRssSources } from '../api/rss'
 import { getTags } from '../api/tags'
 import ContentCard from '../components/content/ContentCard'
@@ -26,7 +26,16 @@ function markAsRead(id: number) {
 
 export default function FeedPage() {
   const navigate = useNavigate()
-  const [page, setPage] = useState(0)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const page = Math.max(0, parseInt(searchParams.get('page') ?? '0', 10) || 0)
+  const setPage = useCallback((p: number) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (p === 0) next.delete('page')
+      else next.set('page', String(p))
+      return next
+    }, { replace: true })
+  }, [setSearchParams])
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
   const [selectedSites, setSelectedSites] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
