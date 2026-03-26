@@ -34,7 +34,7 @@ export default function FeedPage() {
       if (p === 0) next.delete('page')
       else next.set('page', String(p))
       return next
-    }, { replace: true })
+    })
   }, [setSearchParams])
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
   const [selectedSites, setSelectedSites] = useState<Set<string>>(new Set())
